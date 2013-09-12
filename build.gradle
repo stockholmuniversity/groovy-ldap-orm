@@ -62,9 +62,6 @@ repositories {
  * Buildscript dependencies
  */
 buildscript {
-
-  //apply from: 'https://github.com/valkolovos/gradle_cobertura/raw/master/repo/gradle_cobertura/gradle_cobertura/1.0-rc4/coberturainit.gradle'
-
   dependencies {
     classpath 'com.github.townsfolk:gradle-release:1.2'
     classpath 'com.eriwen:gradle-cobertura-plugin:1.1.1'
