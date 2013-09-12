@@ -1,0 +1,75 @@
+/*
+ * Copyright (c) 2013, IT Services, Stockholm University
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *
+ * Neither the name of Stockholm University nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+apply plugin: 'groovy'
+apply plugin: 'maven'
+apply plugin: 'release'
+apply plugin: 'cobertura'
+
+/**
+ * Wrapper
+ */
+task wrapper(type: Wrapper) {
+  gradleVersion = '1.7'
+}
+
+cobertura {
+  format = 'xml'
+  includes = ['**/*.groovy']
+}
+
+dependencies {
+  compile group: 'org.apache.directory.api', name:'api-all', version:'1.0.0-M19'
+  testCompile group: 'org.spockframework', name: 'spock-core', version: '0.7-groovy-1.8'
+}
+
+repositories {
+  maven {
+    url "http://maven.it.su.se/it.su.se/maven2"
+  }
+  mavenCentral()
+}
+
+/**
+ * Buildscript dependencies
+ */
+buildscript {
+
+  //apply from: 'https://github.com/valkolovos/gradle_cobertura/raw/master/repo/gradle_cobertura/gradle_cobertura/1.0-rc4/coberturainit.gradle'
+
+  dependencies {
+    classpath 'com.github.townsfolk:gradle-release:1.2'
+    classpath 'com.eriwen:gradle-cobertura-plugin:1.1.1'
+  }
+  repositories {
+    mavenCentral()
+  }
+}
