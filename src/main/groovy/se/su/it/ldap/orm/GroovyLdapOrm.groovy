@@ -2,12 +2,15 @@ package se.su.it.ldap.orm
 
 import org.springframework.context.ApplicationContext
 import org.springframework.context.support.ClassPathXmlApplicationContext
+import se.su.it.ldap.orm.config.ConfigManager
 
 class GroovyLdapOrm {
 
-  public GroovyLdapOrm(){
+  ConfigManager configManager
+
+  public GroovyLdapOrm() {
     ApplicationContext applicationContext = new ClassPathXmlApplicationContext("beans.xml");
-    applicationContext.getBean('ldapConnectionConfig')
+    configManager = applicationContext.getBean('configManager')
   }
 
   public void init() {

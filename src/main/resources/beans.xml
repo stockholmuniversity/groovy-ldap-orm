@@ -12,4 +12,6 @@
   <bean id="ldapConnectionConfig" class="org.apache.directory.ldap.client.api.LdapConnectionConfig">
     <property name="ldapHost" value="foo" />
   </bean>
+
+  <bean id="configManager" class="se.su.it.ldap.orm.config.ConfigManager"/>
 </beans>
