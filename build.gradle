@@ -33,6 +33,7 @@ apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'release'
 apply plugin: 'cobertura'
+apply plugin: 'idea'
 
 /**
  * Wrapper
@@ -47,8 +48,12 @@ cobertura {
 }
 
 dependencies {
+  compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.1.7'
   compile group: 'org.apache.directory.api', name:'api-all', version:'1.0.0-M19'
-  testCompile group: 'org.spockframework', name: 'spock-core', version: '0.7-groovy-1.8'
+  compile group: 'org.springframework', name:'spring-beans', version:'3.2.4.RELEASE'
+  compile group: 'org.springframework', name:'spring-context', version:'3.2.4.RELEASE'
+
+  testCompile group: 'org.spockframework', name: 'spock-core', version: '0.7-groovy-2.0'
 }
 
 repositories {
