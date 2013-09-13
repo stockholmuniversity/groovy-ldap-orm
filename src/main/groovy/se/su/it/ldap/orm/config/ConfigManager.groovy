@@ -1,12 +1,15 @@
 package se.su.it.ldap.orm.config
 
-import org.apache.directory.ldap.client.api.LdapConnectionConfig
+import org.apache.directory.ldap.client.api.LdapConnection
+import org.apache.directory.ldap.client.api.LdapConnectionPool
 import org.springframework.beans.factory.annotation.Autowired
-import se.su.it.ldap.orm.GroovyLdapOrm
 
 class ConfigManager {
 
   @Autowired
-  LdapConnectionConfig ldapConnectionConfig
+  private LdapConnectionPool connectionPool
 
+  public LdapConnection getConnection() {
+    connectionPool.connection
+  }
 }

@@ -10,7 +10,23 @@
   <context:annotation-config />
 
   <bean id="ldapConnectionConfig" class="org.apache.directory.ldap.client.api.LdapConnectionConfig">
-    <property name="ldapHost" value="foo" />
+    <property name="ldapHost" value="ldap-test.su.se" />
+    <property name="ldapPort" value="389" />
+  </bean>
+
+  <bean id="connectionFactory" class="org.apache.directory.ldap.client.api.PoolableLdapConnectionFactory">
+    <constructor-arg name="config" ref="ldapConnectionConfig"/>
+  </bean>
+
+  <bean id="connectionPool" class="org.apache.directory.ldap.client.api.LdapConnectionPool">
+    <constructor-arg name="factory" ref="connectionFactory" />
+    <property name="testOnBorrow" value="true" />
+  </bean>
+
+  <bean id="configuration" class="javax.security.auth.login.Configuration" factory-method="getConfiguration" />
+
+  <bean id="saslGssApiRequest" class="org.apache.directory.ldap.client.api.SaslGssApiRequest">
+    <property name="loginModuleConfiguration" ref="configuration" />
   </bean>
 
   <bean id="configManager" class="se.su.it.ldap.orm.config.ConfigManager"/>
