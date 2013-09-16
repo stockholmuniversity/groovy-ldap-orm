@@ -8,9 +8,11 @@ class GroovyLdapOrm {
 
   ConfigManager configManager
 
-  public GroovyLdapOrm() {
+  public GroovyLdapOrm(ConfigObject customConfig) {
     ApplicationContext applicationContext = new ClassPathXmlApplicationContext("beans.xml");
     configManager = applicationContext.getBean('configManager')
+
+    configManager.loadConfig(customConfig)
   }
 
   public void init() {

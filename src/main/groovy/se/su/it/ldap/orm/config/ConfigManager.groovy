@@ -1,15 +1,20 @@
 package se.su.it.ldap.orm.config
 
-import org.apache.directory.ldap.client.api.LdapConnection
-import org.apache.directory.ldap.client.api.LdapConnectionPool
-import org.springframework.beans.factory.annotation.Autowired
-
 class ConfigManager {
 
-  @Autowired
-  private LdapConnectionPool connectionPool
+  public static final String CONFIG_FILE = 'config_defaults.groovy'
 
-  public LdapConnection getConnection() {
-    connectionPool.connection
+  private ConfigObject config
+
+  public ConfigManager() {
+    config = new ConfigSlurper().parse(CONFIG_FILE)
+  }
+
+  public void loadConfig(ConfigObject customConfig) throws IOException {
+    config.merge(customConfig)
+  }
+
+  public ConfigObject getConfig() {
+    config
   }
 }
