@@ -54,6 +54,8 @@ dependencies {
   compile group: 'org.springframework', name:'spring-context', version:'3.2.4.RELEASE'
 
   testCompile group: 'org.spockframework', name: 'spock-core', version: '0.7-groovy-2.0'
+  testCompile group: 'org.objenesis', name: 'objenesis', version: '2.0'
+  testCompile group: 'cglib', name: 'cglib-nodep', version: '2.2'
 }
 
 repositories {
