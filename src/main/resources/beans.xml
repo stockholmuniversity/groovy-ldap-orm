@@ -66,6 +66,4 @@
   <bean id="saslGssApiRequest" class="org.apache.directory.ldap.client.api.SaslGssApiRequest">
     <property name="loginModuleConfiguration" ref="configuration" />
   </bean>
-
-  <bean id="configManager" class="se.su.it.ldap.orm.config.ConfigManager"/>
 </beans>

@@ -40,10 +40,10 @@ class GroovyLdapOrm {
   ConfigManager configManager
 
   public GroovyLdapOrm(ConfigObject customConfig) {
-    ApplicationContext applicationContext = new ClassPathXmlApplicationContext("beans.xml");
-    configManager = applicationContext.getBean('configManager')
-
+    configManager = new ConfigManager()
     configManager.loadConfig(customConfig)
+
+    ApplicationContext applicationContext = new ClassPathXmlApplicationContext("beans.xml");
   }
 
   public void init() {
