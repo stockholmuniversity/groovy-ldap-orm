@@ -31,14 +31,16 @@
 
 package se.su.it.ldap.orm.config
 
+@Singleton
 class ConfigManager {
 
-  public static final String CONFIG_FILE = 'config_defaults.groovy'
+  public static final String CONFIG_FILE = File.separator + 'config_defaults.groovy'
 
   private ConfigObject config
 
-  public ConfigManager() {
-    config = new ConfigSlurper().parse(CONFIG_FILE)
+  private ConfigManager() {
+    URL defaults_path = ClassLoader.getResource(CONFIG_FILE)
+    config = new ConfigSlurper().parse(defaults_path as URL)
   }
 
   public void loadConfig(ConfigObject customConfig) throws IOException {

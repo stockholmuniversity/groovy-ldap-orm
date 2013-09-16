@@ -29,15 +29,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package se.su.it.orm
+package se.su.it.ldap.orm
 
-import se.su.it.ldap.orm.GroovyLdapOrm
+import org.springframework.context.support.ClassPathXmlApplicationContext
+import se.su.it.ldap.orm.config.ConfigManager
 import spock.lang.Specification
 
 class GroovyLdapOrmSpec extends Specification {
 
-  def "Test"() {
-    expect:
-    new GroovyLdapOrm().configManager.ldapConnectionConfig.ldapHost == 'foo'
+  def "Constructor should load custom config to config manager"() {
+    setup:
+    def customConfig = new ConfigObject()
+
+    GroovyMock(ClassPathXmlApplicationContext, global: true)
+    def configManager = GroovyMock(ConfigManager, global: true)
+    ConfigManager.getInstance() >> configManager
+
+    when:
+    new GroovyLdapOrm(customConfig)
+
+    then:
+    1 * configManager.loadConfig(customConfig)
   }
 }

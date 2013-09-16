@@ -29,3 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+ldap {
+  host = ''
+  port = '369'
+}

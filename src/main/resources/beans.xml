@@ -43,10 +43,13 @@
 
   <context:annotation-config />
 
+  <bean id="configManager" class="se.su.it.ldap.orm.config.ConfigManager" />
+
   <bean id="placeholderConfigurer" class="se.su.it.ldap.orm.config.ConfigSlurperPropertyPlaceholderConfigurer">
     <property name="systemPropertiesMode">
       <util:constant static-field="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer.SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
     </property>
+    <property name="configManager" ref="configManager" />
   </bean>
 
   <bean id="ldapConnectionConfig" class="org.apache.directory.ldap.client.api.LdapConnectionConfig">
@@ -63,9 +66,9 @@
     <property name="testOnBorrow" value="true" />
   </bean>
 
-  <bean id="configuration" class="javax.security.auth.login.Configuration" factory-method="getConfiguration" />
+  <bean id="configuration" class="javax.security.auth.login.Configuration" factory-method="getConfiguration" lazy-init="true"/>
 
-  <bean id="saslGssApiRequest" class="org.apache.directory.ldap.client.api.SaslGssApiRequest">
+  <bean id="saslGssApiRequest" class="org.apache.directory.ldap.client.api.SaslGssApiRequest" lazy-init="true">
     <property name="loginModuleConfiguration" ref="configuration" />
   </bean>
 </beans>
