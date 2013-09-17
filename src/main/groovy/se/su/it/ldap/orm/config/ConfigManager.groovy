@@ -44,7 +44,7 @@ class ConfigManager {
   }
 
   public void loadConfig(ConfigObject customConfig) throws IOException {
-    config.merge(customConfig)
+    config = config.merge(customConfig) as ConfigObject
   }
 
   public ConfigObject getConfig() {
