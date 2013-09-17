@@ -31,18 +31,67 @@
 
 package se.su.it.ldap.orm.mixin
 
-import org.apache.directory.api.ldap.model.cursor.EntryCursor
+import org.apache.directory.api.ldap.model.cursor.SearchCursor
+import org.apache.directory.api.ldap.model.message.SearchRequest
+import org.apache.directory.api.ldap.model.message.SearchRequestImpl
+import org.apache.directory.api.ldap.model.message.SearchScope
+import org.apache.directory.api.ldap.model.name.Dn
 import se.su.it.ldap.orm.connection.ConnectionFactory
 
 class LdapOrmMixin {
 
   static ConnectionFactory connectionFactory = ConnectionFactory.instance
 
-  static find = { Map args ->
-    def connection = connectionFactory.connection
-    EntryCursor cursor = connection.search(args.base, args.filter, args.scope)
+  static Object find(String base, String filter) {
+    find(base, filter, null)
+  }
 
-    cursor.next()
-    cursor.get()
+  static Object find(String base, String filter, SearchScope scope) {
+    find(base: base, filter: filter, scope: scope)
+  }
+
+  static Object find(Map args) {
+    args.limit = 1
+
+    def ret = findAll(args)
+    ret ? ret[0] : []
+  }
+
+  static Object[] findAll(String base, String filter) {
+    findAll(base, filter, null, null)
+  }
+
+  static Object[] findAll(String base, String filter, SearchScope scope) {
+    findAll(base, filter, scope, null)
+  }
+
+  static Object[] findAll(String base, String filter, SearchScope scope, Long limit) {
+    findAll(base: base, filter: filter, scope: scope, limit: limit)
+  }
+
+  static Object[] findAll(Map args) {
+    def connection = connectionFactory.connection
+    SearchRequest request = new SearchRequestImpl()
+    request.setBase(new Dn(args.base ?: ''))
+    request.setFilter(args.filter as String)
+    request.setScope(args.scope ?: SearchScope.SUBTREE)
+
+    if (args.limit) {
+      request.setSizeLimit(args.limit)
+    }
+
+    SearchCursor cursor = connection.search(request)
+
+    List<Object> entries = new ArrayList<Object>()
+
+    while(!cursor.done) {
+      if (cursor.isEntry()) {
+        entries << cursor.getEntry()
+      }
+
+      cursor.next()
+    }
+
+    entries
   }
 }
