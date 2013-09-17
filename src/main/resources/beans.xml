@@ -43,7 +43,7 @@
 
   <context:annotation-config />
 
-  <bean id="configManager" class="se.su.it.ldap.orm.config.ConfigManager" />
+  <bean id="configManager" class="se.su.it.ldap.orm.config.ConfigManager" scope="singleton" factory-method="getInstance"/>
 
   <bean id="placeholderConfigurer" class="se.su.it.ldap.orm.config.ConfigSlurperPropertyPlaceholderConfigurer">
     <property name="systemPropertiesMode">
