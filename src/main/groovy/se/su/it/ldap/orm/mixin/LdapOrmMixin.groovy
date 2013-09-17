@@ -36,13 +36,13 @@ import se.su.it.ldap.orm.connection.ConnectionFactory
 
 class LdapOrmMixin {
 
-  private static ConnectionFactory connectionFactory
+  static ConnectionFactory connectionFactory = ConnectionFactory.instance
 
-  static Object find(Map args) {
+  static find = { Map args ->
     def connection = connectionFactory.connection
     EntryCursor cursor = connection.search(args.base, args.filter, args.scope)
 
-    cursor.first()
+    cursor.next()
     cursor.get()
   }
 }
