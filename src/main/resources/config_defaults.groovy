@@ -31,9 +31,9 @@
 
 ldap {
   host = ''
-  port = '369'
+  port = '389'
 
-  connecton {
+  connection {
     gssapi = false
     loginContextName = 'spnego-client'
     timeout = 0
