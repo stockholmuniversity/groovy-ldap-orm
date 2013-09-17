@@ -29,54 +29,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package se.su.it.ldap.orm
+package se.su.it.ldap.orm.mixin
 
-import org.springframework.context.support.ClassPathXmlApplicationContext
-import se.su.it.ldap.orm.config.ConfigManager
-import se.su.it.ldap.orm.mixin.LdapOrmMixin
-import spock.lang.Specification
+import org.apache.directory.api.ldap.model.cursor.EntryCursor
+import se.su.it.ldap.orm.connection.ConnectionFactory
 
-class GroovyLdapOrmSpec extends Specification {
+class LdapOrmMixin {
 
-  def setup() {
-    ConfigManager.metaClass.static.getInstance = { new ConfigManager() }
-  }
+  private static ConnectionFactory connectionFactory
 
-  def cleanup() {
-    ConfigManager.metaClass = null
-  }
+  static Object find(Map args) {
+    def connection = connectionFactory.connection
+    EntryCursor cursor = connection.search(args.base, args.filter, args.scope)
 
-  def "Constructor should load custom config to config manager"() {
-    setup:
-    def customConfig = new ConfigObject()
-
-    GroovyMock(ClassPathXmlApplicationContext, global: true)
-    def configManager = GroovyMock(ConfigManager)
-    ConfigManager.metaClass.static.getInstance = { configManager }
-
-    when:
-    new GroovyLdapOrm(customConfig)
-
-    then:
-    1 * configManager.loadConfig(customConfig)
-  }
-
-  def "init should apply mixin to configured schema classes"() {
-    setup:
-    def customConfig = new ConfigObject()
-    customConfig.schemas = [
-            DummySchema
-    ]
-    GroovyMock(DummySchema, global: true)
-
-    when:
-    new GroovyLdapOrm(customConfig).init()
-
-    then:
-    1 * DummySchema.mixin(LdapOrmMixin)
-  }
-
-  class DummySchema {
-
+    cursor.first()
+    cursor.get()
   }
 }

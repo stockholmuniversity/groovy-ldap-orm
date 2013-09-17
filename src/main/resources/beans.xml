@@ -57,13 +57,17 @@
     <property name="ldapPort" value="${ldap.port}" />
   </bean>
 
-  <bean id="connectionFactory" class="org.apache.directory.ldap.client.api.PoolableLdapConnectionFactory">
+  <bean id="poolableLdapConnectionFactory" class="org.apache.directory.ldap.client.api.PoolableLdapConnectionFactory">
     <constructor-arg name="config" ref="ldapConnectionConfig"/>
   </bean>
 
   <bean id="connectionPool" class="org.apache.directory.ldap.client.api.LdapConnectionPool">
-    <constructor-arg name="factory" ref="connectionFactory" />
+    <constructor-arg name="factory" ref="poolableLdapConnectionFactory" />
     <property name="testOnBorrow" value="true" />
+  </bean>
+
+  <bean id="connectionFactory" class="se.su.it.ldap.orm.connection.ConnectionFactory" scope="singleton" factory-method="getInstance">
+    <property name="ldapConnectionPool" ref="connectionPool" />
   </bean>
 
   <bean id="configuration" class="javax.security.auth.login.Configuration" factory-method="getConfiguration" lazy-init="true"/>

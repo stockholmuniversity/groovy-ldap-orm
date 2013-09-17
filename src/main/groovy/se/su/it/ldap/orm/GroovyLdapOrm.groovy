@@ -34,19 +34,25 @@ package se.su.it.ldap.orm
 import org.springframework.context.ApplicationContext
 import org.springframework.context.support.ClassPathXmlApplicationContext
 import se.su.it.ldap.orm.config.ConfigManager
+import se.su.it.ldap.orm.connection.ConnectionFactory
+import se.su.it.ldap.orm.mixin.LdapOrmMixin
 
 class GroovyLdapOrm {
 
+  ApplicationContext applicationContext
   ConfigManager configManager
 
   public GroovyLdapOrm(ConfigObject customConfig) {
     configManager = ConfigManager.instance
     configManager.loadConfig(customConfig)
 
-    ApplicationContext applicationContext = new ClassPathXmlApplicationContext("beans.xml");
+    applicationContext = new ClassPathXmlApplicationContext("beans.xml");
   }
 
   public void init() {
-
+    configManager.config.schemas?.each { Class schema ->
+      schema.mixin(LdapOrmMixin)
+      schema.connectionFactory = ConnectionFactory.instance
+    }
   }
 }
