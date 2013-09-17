@@ -1,11 +1,13 @@
 package se.su.it.ldap.orm.connection
 
 import org.apache.directory.api.ldap.model.exception.LdapException
+import org.apache.directory.api.ldap.model.message.BindRequest
 import org.apache.directory.api.ldap.model.message.BindResponse
 import org.apache.directory.api.ldap.model.message.LdapResult
 import org.apache.directory.api.ldap.model.message.ResultCodeEnum
 import org.apache.directory.ldap.client.api.LdapConnection
 import org.apache.directory.ldap.client.api.LdapConnectionPool
+import org.apache.directory.ldap.client.api.LdapNetworkConnection
 import org.apache.directory.ldap.client.api.SaslGssApiRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -29,7 +31,7 @@ class ConnectionFactory {
     LdapConnection connection = ldapConnectionPool.getConnection()
     connection.setTimeOut(config.ldap.connection.timeout)
 
-    if (config.ldap.connection.gssapi) {
+    if (config.ldap.connection.gssapi && connection instanceof LdapNetworkConnection) {
       SaslGssApiRequest saslGssApiRequest = applicationContext.getBean('saslGssApiRequest')
       saslGssApiRequest.loginContextName = config.ldap.connection.loginContextName
 
