@@ -29,22 +29,21 @@ class ConnectionFactory {
     LdapConnection connection = ldapConnectionPool.getConnection()
     connection.setTimeOut(config.ldap.connection.timeout)
 
-    BindResponse response
-
     if (config.ldap.connection.gssapi) {
       SaslGssApiRequest saslGssApiRequest = applicationContext.getBean('saslGssApiRequest')
       saslGssApiRequest.loginContextName = config.ldap.connection.loginContextName
 
-      response = connection.bind(saslGssApiRequest)
-    }
-    else {
-      response = connection.bind()
+      BindResponse response = connection.bind(saslGssApiRequest)
+
+      LdapResult ldapResult = response?.getLdapResult()
+      if(!ResultCodeEnum.SUCCESS == ldapResult?.getResultCode() ||
+              !connection.connected || !connection.authenticated) {
+        throw new LdapException(this.class.name + " - Could not bind connection (${ldapResult.resultCode}):" + ldapResult.diagnosticMessage)
+      }
     }
 
-    LdapResult ldapResult = response.getLdapResult()
-    if(!ResultCodeEnum.SUCCESS == ldapResult.getResultCode() ||
-            !connection.isConnected() || !connection.isAuthenticated()) {
-      throw new LdapException(this.class.name + " - Could not bind connection (${ldapResult.resultCode}):" + ldapResult.diagnosticMessage)
+    if (!connection.connected || !connection.authenticated) {
+      connection.bind() // Anonymous bind
     }
 
     connection
