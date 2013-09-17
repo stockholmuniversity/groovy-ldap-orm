@@ -45,7 +45,7 @@ class ConnectionFactory {
     }
 
     if (!connection.connected || !connection.authenticated) {
-      connection.bind() // Anonymous bind
+      connection.anonymousBind() // Anonymous bind
     }
 
     connection
