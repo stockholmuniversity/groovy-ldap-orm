@@ -33,7 +33,7 @@ package se.su.it.ldap.orm
 
 import org.springframework.context.support.ClassPathXmlApplicationContext
 import se.su.it.ldap.orm.config.ConfigManager
-import se.su.it.ldap.orm.mixin.LdapOrmMixin
+import se.su.it.ldap.orm.mixin.GroovyLdapSchema
 import spock.lang.Specification
 
 class GroovyLdapOrmSpec extends Specification {
@@ -73,7 +73,7 @@ class GroovyLdapOrmSpec extends Specification {
     new GroovyLdapOrm(customConfig).init()
 
     then:
-    1 * DummySchema.mixin(LdapOrmMixin)
+    1 * DummySchema.mixin(GroovyLdapSchema)
   }
 
   class DummySchema {

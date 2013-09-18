@@ -34,12 +34,16 @@ package se.su.it.ldap.orm
 import org.springframework.context.ApplicationContext
 import org.springframework.context.support.ClassPathXmlApplicationContext
 import se.su.it.ldap.orm.config.ConfigManager
-import se.su.it.ldap.orm.mixin.LdapOrmMixin
+import se.su.it.ldap.orm.mixin.GroovyLdapSchema
+import se.su.it.ldap.orm.mixin.OrmInstantiator
+import org.apache.directory.api.ldap.model.entry.Entry
 
 class GroovyLdapOrm {
 
   ApplicationContext applicationContext
   ConfigManager configManager
+
+  Map<String, OrmInstantiator> foo = [:]
 
   public GroovyLdapOrm(ConfigObject customConfig) {
     configManager = ConfigManager.instance
@@ -50,7 +54,23 @@ class GroovyLdapOrm {
 
   public void init() {
     configManager.config.schemas?.each { Class schema ->
-      schema.mixin LdapOrmMixin
+      schema.mixin GroovyLdapSchema
+      schema.metaClass.static.methodMissing = { String name, Object args ->
+        def ret = GroovyLdapSchema.invokeMethod(name, args)
+
+        OrmInstantiator instantiator = foo.get(delegate.name)
+
+        if (ret instanceof Collection<Entry>) {
+          return ret.collect { Entry entry ->
+            instantiator.newSchemaInstance(entry.attributes)
+          }
+        }
+        else if (ret instanceof Entry) {
+          return instantiator.newSchemaInstance(ret.attributes)
+        }
+
+      }
+      foo.put(schema.name, new OrmInstantiator(schema))
     }
   }
 }

@@ -38,9 +38,11 @@ import org.apache.directory.api.ldap.model.message.SearchScope
 import org.apache.directory.api.ldap.model.name.Dn
 import se.su.it.ldap.orm.connection.ConnectionFactory
 
-class LdapOrmMixin {
+class GroovyLdapSchema {
 
   static ConnectionFactory connectionFactory = ConnectionFactory.instance
+
+  static OrmInstantiator ormInstantiator = null
 
   static Object find(String base, String filter) {
     find(base, filter, null)
@@ -54,7 +56,7 @@ class LdapOrmMixin {
     args.limit = 1
 
     def ret = findAll(args)
-    ret ? ret[0] : []
+    ret ? ret[0] : null
   }
 
   static Object[] findAll(String base, String filter) {
