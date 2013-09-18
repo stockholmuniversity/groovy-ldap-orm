@@ -22,8 +22,24 @@ class OrmInstantiator {
     Object object = schema.newInstance()
 
     attributes?.each { attribute ->
-      if (attributeMap.containsValue(attribute.id) && schema.metaClass.hasProperty(object, attribute.id)) {
-        schema.metaClass.setProperty(object, attribute.id, attribute.get().string)
+      def name = attribute.upId
+      if (attributeMap.containsValue(name) && schema.metaClass.hasProperty(object, name)) {
+        MetaProperty prop = schema.metaClass.properties.find { it.name == name }
+
+        Object value
+        switch (prop.type) {
+          case Set:
+            value = attribute*.string
+            break
+          case String:
+            value = attribute*.string
+            value = value?.first()
+            break
+        }
+
+        if(value) {
+          schema.metaClass.setProperty(object, name, value)
+        }
       }
     }
 
