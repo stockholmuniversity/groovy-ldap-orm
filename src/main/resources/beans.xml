@@ -55,6 +55,8 @@
   <bean id="ldapConnectionConfig" class="org.apache.directory.ldap.client.api.LdapConnectionConfig">
     <property name="ldapHost" value="${ldap.host}" />
     <property name="ldapPort" value="${ldap.port}" />
+    <property name="useSsl" value="${ldap.ssl}" />
+    <property name="useTls" value="${ldap.tls}" />
   </bean>
 
   <bean id="poolableLdapConnectionFactory" class="org.apache.directory.ldap.client.api.PoolableLdapConnectionFactory">

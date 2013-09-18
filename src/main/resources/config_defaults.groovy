@@ -32,6 +32,8 @@
 ldap {
   host = ''
   port = '389'
+  ssl = false
+  tls = false
 
   connection {
     gssapi = false
