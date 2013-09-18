@@ -60,7 +60,7 @@ class GroovyLdapOrm {
 
         OrmInstantiator instantiator = foo.get(delegate.name)
 
-        if (ret instanceof Collection<Entry>) {
+        if (ret instanceof Object[]) {
           return ret.collect { Entry entry ->
             instantiator.newSchemaInstance(entry.attributes)
           }
