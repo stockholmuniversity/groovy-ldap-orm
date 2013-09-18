@@ -42,33 +42,11 @@ class GroovyLdapSchema {
 
   static ConnectionFactory connectionFactory = ConnectionFactory.instance
 
-  static OrmInstantiator ormInstantiator = null
-
-  static Object find(String base, String filter) {
-    find(base, filter, null)
-  }
-
-  static Object find(String base, String filter, SearchScope scope) {
-    find(base: base, filter: filter, scope: scope)
-  }
-
   static Object find(Map args) {
     args.limit = 1
 
     def ret = findAll(args)
     ret ? ret[0] : null
-  }
-
-  static Object[] findAll(String base, String filter) {
-    findAll(base, filter, null, null)
-  }
-
-  static Object[] findAll(String base, String filter, SearchScope scope) {
-    findAll(base, filter, scope, null)
-  }
-
-  static Object[] findAll(String base, String filter, SearchScope scope, Long limit) {
-    findAll(base: base, filter: filter, scope: scope, limit: limit)
   }
 
   static Object[] findAll(Map args) {
@@ -80,6 +58,10 @@ class GroovyLdapSchema {
 
     if (args.limit) {
       request.setSizeLimit(args.limit)
+    }
+
+    if (args.attributes) {
+      request.addAttributes(args.attributes as String[])
     }
 
     SearchCursor cursor = connection.search(request)

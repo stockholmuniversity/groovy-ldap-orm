@@ -43,7 +43,7 @@ class GroovyLdapOrm {
   ApplicationContext applicationContext
   ConfigManager configManager
 
-  Map<String, OrmInstantiator> foo = [:]
+  Map<String, OrmInstantiator> initiators = [:]
 
   public GroovyLdapOrm(ConfigObject customConfig) {
     configManager = ConfigManager.instance
@@ -55,10 +55,15 @@ class GroovyLdapOrm {
   public void init() {
     configManager.config.schemas?.each { Class schema ->
       schema.mixin GroovyLdapSchema
-      schema.metaClass.static.methodMissing = { String name, Object args ->
-        def ret = GroovyLdapSchema.invokeMethod(name, args)
+      schema.metaClass.static.methodMissing = { String name, Object[] args ->
+        OrmInstantiator instantiator = initiators.get(delegate.name)
 
-        OrmInstantiator instantiator = foo.get(delegate.name)
+        /** Add the declared fields of the schema to the ldap search */
+        if (name.startsWith('find') && args?.size() && args[0] instanceof Map && !args[0].attributes) {
+          args[0].attributes =  instantiator.attributeMap.keySet()
+        }
+
+        def ret = GroovyLdapSchema.invokeMethod(name, args)
 
         if (ret instanceof Object[]) {
           return ret.collect { Entry entry ->
@@ -70,7 +75,8 @@ class GroovyLdapOrm {
         }
 
       }
-      foo.put(schema.name, new OrmInstantiator(schema))
+
+      initiators.put(schema.name, new OrmInstantiator(schema))
     }
   }
 }

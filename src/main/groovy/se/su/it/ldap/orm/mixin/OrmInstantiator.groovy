@@ -8,14 +8,19 @@ import java.lang.reflect.Modifier
 
 class OrmInstantiator {
 
-  static Map foo = [:]
+  private static List<String> excludedProperties = ['metaClass']
 
-  Class schema
-  Map<String, String> attributeMap = [:]
+  private Class schema
+
+  private Map<String, String> attributeMap = [:]
 
   public OrmInstantiator(Class schema) {
     this.schema = schema
     attributeMap = generateAttributeMap()
+  }
+
+  public Map<String, String> getAttributeMap() {
+    return attributeMap.clone() as Map
   }
 
   public Object newSchemaInstance(Collection<Attribute> attributes) {
@@ -50,7 +55,10 @@ class OrmInstantiator {
     Map mappings = [:]
 
     schema.declaredFields.each { Field field ->
-      if (!Modifier.isStatic(field.modifiers) && hasGetter(schema, field.name) && hasSetter(schema, field.name)) {
+      if (!Modifier.isStatic(field.modifiers) &&
+              hasGetter(schema, field.name) &&
+              hasSetter(schema, field.name) &&
+              !excludedProperties.contains(field.name)) {
         mappings.put field.name, field.name
       }
     }
