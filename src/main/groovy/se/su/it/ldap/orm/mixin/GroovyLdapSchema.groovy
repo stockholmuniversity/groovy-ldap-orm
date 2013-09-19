@@ -32,19 +32,9 @@
 package se.su.it.ldap.orm.mixin
 
 import org.apache.directory.api.ldap.model.cursor.SearchCursor
-import org.apache.directory.api.ldap.model.entry.DefaultAttribute
 import org.apache.directory.api.ldap.model.entry.DefaultEntry
 import org.apache.directory.api.ldap.model.entry.Entry
-import org.apache.directory.api.ldap.model.message.AbandonListener
-import org.apache.directory.api.ldap.model.message.AbandonableRequest
-import org.apache.directory.api.ldap.model.message.AddRequest
-import org.apache.directory.api.ldap.model.message.AddRequestImpl
-import org.apache.directory.api.ldap.model.message.AddResponse
-import org.apache.directory.api.ldap.model.message.Control
-import org.apache.directory.api.ldap.model.message.MessageTypeEnum
-import org.apache.directory.api.ldap.model.message.SearchRequest
-import org.apache.directory.api.ldap.model.message.SearchRequestImpl
-import org.apache.directory.api.ldap.model.message.SearchScope
+import org.apache.directory.api.ldap.model.message.*
 import org.apache.directory.api.ldap.model.name.Dn
 import se.su.it.ldap.orm.connection.ConnectionFactory
 
