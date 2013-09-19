@@ -31,11 +31,12 @@
 
 package se.su.it.ldap.orm
 
+import org.apache.directory.api.ldap.model.name.Dn
 import org.springframework.context.ApplicationContext
 import org.springframework.context.support.ClassPathXmlApplicationContext
 import se.su.it.ldap.orm.config.ConfigManager
 import se.su.it.ldap.orm.mixin.GroovyLdapSchema
-import se.su.it.ldap.orm.mixin.OrmInstantiator
+import se.su.it.ldap.orm.mixin.AttributeMapper
 import org.apache.directory.api.ldap.model.entry.Entry
 
 class GroovyLdapOrm {
@@ -43,7 +44,6 @@ class GroovyLdapOrm {
   ApplicationContext applicationContext
   ConfigManager configManager
 
-  Map<String, OrmInstantiator> initiators = [:]
 
   public GroovyLdapOrm(ConfigObject customConfig) {
     configManager = ConfigManager.instance
@@ -55,28 +55,35 @@ class GroovyLdapOrm {
   public void init() {
     configManager.config.schemas?.each { Class schema ->
       schema.mixin GroovyLdapSchema
+
       schema.metaClass.static.methodMissing = { String name, Object[] args ->
-        OrmInstantiator instantiator = initiators.get(delegate.name)
+        def attributeMapper = AttributeMapper.getInstance(schema)
 
         /** Add the declared fields of the schema to the ldap search */
         if (name.startsWith('find') && args?.size() && args[0] instanceof Map && !args[0].attributes) {
-          args[0].attributes =  instantiator.attributeMap.keySet()
+          args[0].attributes =  attributeMapper.attributeMap.keySet()
         }
 
         def ret = GroovyLdapSchema.invokeMethod(name, args)
 
+        def entryConverter = { Entry entry ->
+          Dn dn = entry.dn
+          def obj = attributeMapper.newSchemaInstance(entry.attributes)
+          obj.dn = dn
+          return obj
+        }
+
         if (ret instanceof Object[]) {
-          return ret.collect { Entry entry ->
-            instantiator.newSchemaInstance(entry.attributes)
+          ret = ret.collect { Entry entry ->
+            entryConverter(entry)
           }
         }
         else if (ret instanceof Entry) {
-          return instantiator.newSchemaInstance(ret.attributes)
+          ret = entryConverter(ret)
         }
 
+        return ret
       }
-
-      initiators.put(schema.name, new OrmInstantiator(schema))
     }
   }
 }

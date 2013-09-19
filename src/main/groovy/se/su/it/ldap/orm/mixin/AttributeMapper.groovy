@@ -1,22 +1,35 @@
 package se.su.it.ldap.orm.mixin
 
 import org.apache.directory.api.ldap.model.entry.Attribute
+import org.apache.directory.api.ldap.model.entry.DefaultAttribute
 import org.codehaus.groovy.runtime.MetaClassHelper
 
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
+import java.util.concurrent.ConcurrentHashMap
 
-class OrmInstantiator {
+class AttributeMapper {
 
-  private static List<String> excludedProperties = ['metaClass']
+  private static List<String> excludedProperties = ['dn', 'metaClass']
+  private static ConcurrentHashMap<String, AttributeMapper> attributeMappers = [:]
 
   private Class schema
-
   private Map<String, String> attributeMap = [:]
 
-  public OrmInstantiator(Class schema) {
+  private AttributeMapper(Class schema) {
     this.schema = schema
     attributeMap = generateAttributeMap()
+  }
+
+  public static synchronized AttributeMapper getInstance(Class schema) {
+    if (attributeMappers.containsKey(schema.name)) {
+      return attributeMappers.get(schema.name)
+    }
+
+    AttributeMapper mapper = new AttributeMapper(schema)
+    attributeMappers.put(schema.name, mapper)
+
+    return mapper
   }
 
   public Map<String, String> getAttributeMap() {
@@ -51,10 +64,34 @@ class OrmInstantiator {
     object
   }
 
+  public Attribute[] generateAttributes(GroovyObject schema) {
+    Collection<Attribute> attributes = []
+
+    attributeMap.each { key, value ->
+      if (schema.hasProperty(value)) {
+        Object propVal = schema.getProperty(value)
+        if (propVal) {
+          Attribute attribute = new DefaultAttribute(value)
+          if (propVal instanceof String) {
+            attribute.add(propVal)
+            attributes << attribute
+          }
+          else if (propVal instanceof Set) {
+            attribute.add(propVal as String[])
+            attributes << attribute
+          }
+        }
+      }
+    }
+
+    return attributes
+  }
+
   private Map<String, String> generateAttributeMap() {
     Map mappings = [:]
 
-    schema.declaredFields.each { Field field ->
+    def fields = (schema.declaredFields + GroovyLdapSchema.declaredFields)
+    fields.each { Field field ->
       if (!Modifier.isStatic(field.modifiers) &&
               hasGetter(schema, field.name) &&
               hasSetter(schema, field.name) &&

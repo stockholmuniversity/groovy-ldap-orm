@@ -32,6 +32,16 @@
 package se.su.it.ldap.orm.mixin
 
 import org.apache.directory.api.ldap.model.cursor.SearchCursor
+import org.apache.directory.api.ldap.model.entry.DefaultAttribute
+import org.apache.directory.api.ldap.model.entry.DefaultEntry
+import org.apache.directory.api.ldap.model.entry.Entry
+import org.apache.directory.api.ldap.model.message.AbandonListener
+import org.apache.directory.api.ldap.model.message.AbandonableRequest
+import org.apache.directory.api.ldap.model.message.AddRequest
+import org.apache.directory.api.ldap.model.message.AddRequestImpl
+import org.apache.directory.api.ldap.model.message.AddResponse
+import org.apache.directory.api.ldap.model.message.Control
+import org.apache.directory.api.ldap.model.message.MessageTypeEnum
 import org.apache.directory.api.ldap.model.message.SearchRequest
 import org.apache.directory.api.ldap.model.message.SearchRequestImpl
 import org.apache.directory.api.ldap.model.message.SearchScope
@@ -41,6 +51,23 @@ import se.su.it.ldap.orm.connection.ConnectionFactory
 class GroovyLdapSchema {
 
   static ConnectionFactory connectionFactory = ConnectionFactory.instance
+
+  Dn dn
+  Set<String> objectClass
+
+  boolean create() {
+    def connection = connectionFactory.connection
+
+    Entry entry = new DefaultEntry(dn: dn)
+
+    def mapper = AttributeMapper.getInstance(this.class)
+    entry.add mapper.generateAttributes(this)
+
+    AddRequest request = new AddRequestImpl()
+    request.setEntry(entry)
+
+    connection.add(request)
+  }
 
   static Object find(Map args) {
     args.limit = 1
