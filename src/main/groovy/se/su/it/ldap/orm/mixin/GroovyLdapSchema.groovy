@@ -32,10 +32,15 @@
 package se.su.it.ldap.orm.mixin
 
 import org.apache.directory.api.ldap.model.cursor.SearchCursor
+import org.apache.directory.api.ldap.model.entry.Attribute
 import org.apache.directory.api.ldap.model.entry.DefaultEntry
 import org.apache.directory.api.ldap.model.entry.Entry
+import org.apache.directory.api.ldap.model.entry.ModificationOperation
 import org.apache.directory.api.ldap.model.message.*
 import org.apache.directory.api.ldap.model.name.Dn
+import org.apache.mina.util.ConcurrentHashSet
+import org.codehaus.groovy.runtime.MetaClassHelper
+import org.codehaus.groovy.runtime.metaclass.OwnedMetaClass
 import se.su.it.ldap.orm.connection.ConnectionFactory
 import se.su.it.ldap.orm.connection.Status
 
@@ -44,7 +49,8 @@ class GroovyLdapSchema {
   static ConnectionFactory connectionFactory = ConnectionFactory.instance
 
   Dn dn
-  Set<String> objectClass
+
+  private ConcurrentHashSet<String> dirtyProperties = []
 
   Status create() {
     def connection = connectionFactory.connection
@@ -59,7 +65,57 @@ class GroovyLdapSchema {
 
     ResultResponse response = connection.add(request)
 
+    // Clean the dirty properties
+    if (response?.ldapResult?.resultCode == ResultCodeEnum.SUCCESS) {
+      emptyDirtyPropertyList()
+    }
+
     return Status.newInstance(response)
+  }
+
+  Status modify() {
+    def connection = connectionFactory.connection
+
+    ModifyRequest request = new ModifyRequestImpl(name: dn)
+
+    def mapper = AttributeMapper.getInstance(this.class)
+
+    // Get the dirty attributes
+    List<Attribute> attributes = mapper.generateAttributes(this, dirtyProperties)
+
+    attributes.each { Attribute attribute ->
+      request.addModification(attribute, ModificationOperation.REPLACE_ATTRIBUTE)
+    }
+
+    ResultResponse response = connection.modify(request)
+
+    // Clean the dirty properties
+    if (response?.ldapResult?.resultCode == ResultCodeEnum.SUCCESS) {
+      emptyDirtyPropertyList()
+    }
+
+    return Status.newInstance(response)
+  }
+
+  @Override
+  void setProperty(String property, Object newValue) {
+    AttributeMapper mapper = AttributeMapper.getInstance(this.class)
+
+    if (mapper.schemaHasAttribute(property)) {
+      this.dirtyProperties << property
+    }
+
+    //this.properties[property] = newValue
+    if (metaClass instanceof OwnedMetaClass && metaClass.owner.class.declaredFields.find { it.name == property }) {
+      metaClass.owner.@"$property" = newValue
+    }
+    else {
+      this.invokeMethod("set${MetaClassHelper.capitalize(property) }", newValue)
+    }
+  }
+
+  void emptyDirtyPropertyList() {
+    dirtyProperties = []
   }
 
   static Object find(Map args) {

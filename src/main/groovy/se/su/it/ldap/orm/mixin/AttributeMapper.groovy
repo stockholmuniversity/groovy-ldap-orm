@@ -36,6 +36,10 @@ class AttributeMapper {
     return attributeMap.clone() as Map
   }
 
+  public boolean schemaHasAttribute(String attributeName) {
+    attributeMap.containsKey(attributeName)
+  }
+
   public Object newSchemaInstance(Collection<Attribute> attributes) {
     Object object = schema.newInstance()
 
@@ -61,17 +65,23 @@ class AttributeMapper {
       }
     }
 
+    object.emptyDirtyPropertyList()
+
     object
   }
 
-  public Attribute[] generateAttributes(GroovyObject schema) {
+  public Attribute[] generateAttributes(GroovyObject object) {
+    generateAttributes(object, attributeMap.keySet())
+  }
+
+  public Attribute[] generateAttributes(GroovyObject object, Set<String> dirtyProperties) {
     Collection<Attribute> attributes = []
 
-    attributeMap.each { key, value ->
-      if (schema.hasProperty(value)) {
-        Object propVal = schema.getProperty(value)
+    for(property in dirtyProperties) {
+      if (object.hasProperty(property) && attributeMap.containsKey(property)) {
+        Object propVal = object.getProperty(property)
         if (propVal) {
-          Attribute attribute = new DefaultAttribute(value)
+          Attribute attribute = new DefaultAttribute(attributeMap.get(property))
           if (propVal instanceof String) {
             attribute.add(propVal)
             attributes << attribute
