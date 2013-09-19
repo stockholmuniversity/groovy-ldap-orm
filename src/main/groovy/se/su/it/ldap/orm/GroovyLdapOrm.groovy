@@ -31,13 +31,13 @@
 
 package se.su.it.ldap.orm
 
+import org.apache.directory.api.ldap.model.entry.Entry
 import org.apache.directory.api.ldap.model.name.Dn
 import org.springframework.context.ApplicationContext
 import org.springframework.context.support.ClassPathXmlApplicationContext
 import se.su.it.ldap.orm.config.ConfigManager
-import se.su.it.ldap.orm.mixin.GroovyLdapSchema
 import se.su.it.ldap.orm.mixin.AttributeMapper
-import org.apache.directory.api.ldap.model.entry.Entry
+import se.su.it.ldap.orm.mixin.GroovyLdapSchema
 
 class GroovyLdapOrm {
 
@@ -56,6 +56,8 @@ class GroovyLdapOrm {
     configManager.config.schemas?.each { Class schema ->
       schema.mixin GroovyLdapSchema
 
+      // TODO: Remove this hack when this jira is solved:
+      // TODO: http://jira.codehaus.org/browse/GROOVY-4370 - Mixin a class with static methods is not working properly
       schema.metaClass.static.methodMissing = { String name, Object[] args ->
         def attributeMapper = AttributeMapper.getInstance(schema)
 
