@@ -37,6 +37,7 @@ import org.apache.directory.api.ldap.model.entry.Entry
 import org.apache.directory.api.ldap.model.message.*
 import org.apache.directory.api.ldap.model.name.Dn
 import se.su.it.ldap.orm.connection.ConnectionFactory
+import se.su.it.ldap.orm.connection.Status
 
 class GroovyLdapSchema {
 
@@ -45,7 +46,7 @@ class GroovyLdapSchema {
   Dn dn
   Set<String> objectClass
 
-  boolean create() {
+  Status create() {
     def connection = connectionFactory.connection
 
     Entry entry = new DefaultEntry(dn: dn)
@@ -56,7 +57,9 @@ class GroovyLdapSchema {
     AddRequest request = new AddRequestImpl()
     request.setEntry(entry)
 
-    connection.add(request)
+    ResultResponse response = connection.add(request)
+
+    return Status.newInstance(response)
   }
 
   static Object find(Map args) {
