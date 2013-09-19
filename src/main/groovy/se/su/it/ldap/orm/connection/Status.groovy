@@ -8,8 +8,8 @@ class Status {
   String message
 
   public static newInstance(ResultResponse response) {
-    int value = response.ldapResult.resultCode.value
-    String message = response.ldapResult.resultCode.message
+    int value = response?.ldapResult?.resultCode?.value
+    String message = response?.ldapResult?.resultCode?.message
 
     new Status(ldapResultCode: value, message: message)
   }
