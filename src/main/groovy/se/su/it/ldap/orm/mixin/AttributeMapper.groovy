@@ -34,6 +34,8 @@ package se.su.it.ldap.orm.mixin
 import org.apache.directory.api.ldap.model.entry.Attribute
 import org.apache.directory.api.ldap.model.entry.DefaultAttribute
 import org.codehaus.groovy.runtime.MetaClassHelper
+import se.su.it.ldap.orm.annotations.AttributeLanguage
+import se.su.it.ldap.orm.annotations.AttributeName
 
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
@@ -45,6 +47,10 @@ class AttributeMapper {
   private static ConcurrentHashMap<String, AttributeMapper> attributeMappers = [:]
 
   private Class schema
+
+  /** The mapper between the schema and the ldap entry.
+   *  The key is the schema property
+   *  The value is the ldap entry attribute */
   private Map<String, String> attributeMap = [:]
 
   private AttributeMapper(Class schema) {
@@ -136,8 +142,24 @@ class AttributeMapper {
       if (!Modifier.isStatic(field.modifiers) &&
               hasGetter(schema, field.name) &&
               hasSetter(schema, field.name) &&
-              !excludedProperties.contains(field.name)) {
-        mappings.put field.name, field.name
+              !excludedProperties.contains(field.name)){
+
+        def realFieldName = null
+
+        if(field.isAnnotationPresent(AttributeName)) {
+          realFieldName = field.getAnnotation(AttributeName)?.value()
+        }
+
+        if (field.isAnnotationPresent(AttributeLanguage)) {
+          String fieldName = realFieldName ?: field.getAnnotation(AttributeLanguage)?.name()
+          String lang = field.getAnnotation(AttributeLanguage)?.lang()
+
+          if (fieldName && lang) {
+            realFieldName = "${fieldName};lang-${lang}"
+          }
+        }
+
+        mappings.put(field.name, realFieldName ?: field.name)
       }
     }
 
