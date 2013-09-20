@@ -115,7 +115,6 @@ class GroovyLdapSchema {
       this.dirtyProperties << property
     }
 
-    //this.properties[property] = newValue
     if (metaClass instanceof OwnedMetaClass && metaClass.owner.class.declaredFields.find { it.name == property }) {
       metaClass.owner.@"$property" = newValue
     }
