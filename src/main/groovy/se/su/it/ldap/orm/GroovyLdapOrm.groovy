@@ -35,7 +35,9 @@ import org.apache.directory.api.ldap.model.entry.Entry
 import org.apache.directory.api.ldap.model.name.Dn
 import org.springframework.context.ApplicationContext
 import org.springframework.context.support.ClassPathXmlApplicationContext
+import se.su.it.ldap.orm.annotations.SchemaFilter
 import se.su.it.ldap.orm.config.ConfigManager
+import se.su.it.ldap.orm.filter.Filter
 import se.su.it.ldap.orm.mixin.AttributeMapper
 import se.su.it.ldap.orm.mixin.GroovyLdapSchema
 
@@ -64,6 +66,13 @@ class GroovyLdapOrm {
         /** Add the declared fields of the schema to the ldap search */
         if (name.startsWith('find') && args?.size() && args[0] instanceof Map && !args[0].attributes) {
           args[0].attributes =  attributeMapper.attributeMap.keySet()
+
+          args[0].filter = new Filter(args[0].filter as String)
+
+          def schemaFilter = schema.getAnnotation(SchemaFilter)?.value()
+          if (schemaFilter) {
+            args[0].filter = Filter.and([new Filter(schemaFilter), args[0].filter])
+          }
         }
 
         def ret = GroovyLdapSchema.invokeMethod(name, args)

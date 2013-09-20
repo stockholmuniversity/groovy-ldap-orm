@@ -97,6 +97,16 @@ class GroovyLdapSchema {
     return Status.newInstance(response)
   }
 
+  void move(String parentDn) {
+    move(new Dn(parentDn))
+  }
+
+  void move(Dn parentDn) {
+    def connection = connectionFactory.connection
+
+    connection.move(dn, parentDn)
+  }
+
   @Override
   void setProperty(String property, Object newValue) {
     AttributeMapper mapper = AttributeMapper.getInstance(this.class)
@@ -127,9 +137,10 @@ class GroovyLdapSchema {
 
   static Object[] findAll(Map args) {
     def connection = connectionFactory.connection
+
     SearchRequest request = new SearchRequestImpl()
     request.setBase(new Dn(args.base ?: ''))
-    request.setFilter(args.filter as String)
+    request.setFilter(args.filter.toString())
     request.setScope(args.scope ?: SearchScope.SUBTREE)
 
     if (args.limit) {
