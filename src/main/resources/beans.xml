@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2013, IT Services, Stockholm University
+  ~ All rights reserved.
+  ~
+  ~ Redistribution and use in source and binary forms, with or without
+  ~ modification, are permitted provided that the following conditions are met:
+  ~
+  ~ Redistributions of source code must retain the above copyright notice, this
+  ~ list of conditions and the following disclaimer.
+  ~
+  ~ Redistributions in binary form must reproduce the above copyright notice,
+  ~ this list of conditions and the following disclaimer in the documentation
+  ~ and/or other materials provided with the distribution.
+  ~
+  ~ Neither the name of Stockholm University nor the names of its contributors
+  ~ may be used to endorse or promote products derived from this software
+  ~ without specific prior written permission.
+  ~
+  ~ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  ~ AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  ~ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ~ ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+  ~ LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  ~ CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  ~ SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  ~ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  ~ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ~ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  ~ POSSIBILITY OF SUCH DAMAGE.
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://www.springframework.org/schema/context
+         http://www.springframework.org/schema/context/spring-context.xsd
+         http://www.springframework.org/schema/util
+         http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+  <context:annotation-config />
+
+  <bean id="configManager" class="se.su.it.ldap.orm.config.ConfigManager" scope="singleton" factory-method="getInstance"/>
+
+  <bean id="placeholderConfigurer" class="se.su.it.ldap.orm.config.ConfigSlurperPropertyPlaceholderConfigurer">
+    <property name="systemPropertiesMode">
+      <util:constant static-field="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer.SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
+    </property>
+    <property name="configManager" ref="configManager" />
+  </bean>
+
+  <bean id="ldapConnectionConfig" class="org.apache.directory.ldap.client.api.LdapConnectionConfig">
+    <property name="ldapHost" value="${ldap.host}" />
+    <property name="ldapPort" value="${ldap.port}" />
+    <property name="useSsl" value="${ldap.ssl}" />
+    <property name="useTls" value="${ldap.tls}" />
+  </bean>
+
+  <bean id="poolableLdapConnectionFactory" class="org.apache.directory.ldap.client.api.PoolableLdapConnectionFactory">
+    <constructor-arg name="config" ref="ldapConnectionConfig"/>
+  </bean>
+
+  <bean id="connectionPool" class="org.apache.directory.ldap.client.api.LdapConnectionPool">
+    <constructor-arg name="factory" ref="poolableLdapConnectionFactory" />
+    <property name="testOnBorrow" value="true" />
+  </bean>
+
+  <bean id="connectionFactory" class="se.su.it.ldap.orm.connection.ConnectionFactory" scope="singleton" factory-method="getInstance">
+    <property name="ldapConnectionPool" ref="connectionPool" />
+  </bean>
+
+  <bean id="configuration" class="javax.security.auth.login.Configuration" factory-method="getConfiguration" lazy-init="true"/>
+
+  <bean id="saslGssApiRequest" class="org.apache.directory.ldap.client.api.SaslGssApiRequest" lazy-init="true">
+    <property name="loginModuleConfiguration" ref="configuration" />
+  </bean>
+</beans>

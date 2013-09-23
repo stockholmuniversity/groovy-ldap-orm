@@ -29,51 +29,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-apply plugin: 'groovy'
-apply plugin: 'maven'
-apply plugin: 'release'
-apply plugin: 'cobertura'
-apply plugin: 'idea'
+package se.su.it.ldap.orm
 
-/**
- * Wrapper
- */
-task wrapper(type: Wrapper) {
-  gradleVersion = '1.7'
-}
+import org.springframework.context.support.ClassPathXmlApplicationContext
+import se.su.it.ldap.orm.config.ConfigManager
+import se.su.it.ldap.orm.mixin.GroovyLdapSchema
+import spock.lang.Specification
 
-cobertura {
-  format = 'xml'
-  includes = ['**/*.groovy']
-}
+class GroovyLdapOrmSpec extends Specification {
 
-dependencies {
-  compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.1.7'
-  compile group: 'org.apache.directory.api', name:'api-all', version:'1.0.0-M19'
-  compile group: 'org.springframework', name:'spring-beans', version:'3.2.4.RELEASE'
-  compile group: 'org.springframework', name:'spring-context', version:'3.2.4.RELEASE'
-
-  testCompile group: 'org.spockframework', name: 'spock-core', version: '0.7-groovy-2.0'
-  testCompile group: 'org.objenesis', name: 'objenesis', version: '2.0'
-  testCompile group: 'cglib', name: 'cglib-nodep', version: '2.2'
-}
-
-repositories {
-  maven {
-    url "http://maven.it.su.se/it.su.se/maven2"
+  def setup() {
+    ConfigManager.metaClass.static.getInstance = { new ConfigManager() }
   }
-  mavenCentral()
-}
 
-/**
- * Buildscript dependencies
- */
-buildscript {
-  dependencies {
-    classpath 'com.github.townsfolk:gradle-release:1.2'
-    classpath 'com.eriwen:gradle-cobertura-plugin:1.1.1'
+  def cleanup() {
+    ConfigManager.metaClass = null
   }
-  repositories {
-    mavenCentral()
+
+  def "Constructor should load custom config to config manager"() {
+    setup:
+    def customConfig = new ConfigObject()
+
+    GroovyMock(ClassPathXmlApplicationContext, global: true)
+    def configManager = GroovyMock(ConfigManager)
+    ConfigManager.metaClass.static.getInstance = { configManager }
+
+    when:
+    new GroovyLdapOrm(customConfig)
+
+    then:
+    1 * configManager.loadConfig(customConfig)
+  }
+
+  def "init should apply mixin to configured schema classes"() {
+    setup:
+    def customConfig = new ConfigObject()
+    customConfig.schemas = [
+            DummySchema
+    ]
+    GroovyMock(DummySchema, global: true)
+
+    when:
+    new GroovyLdapOrm(customConfig).init()
+
+    then:
+    1 * DummySchema.mixin(GroovyLdapSchema)
+  }
+
+  class DummySchema {
+
   }
 }
