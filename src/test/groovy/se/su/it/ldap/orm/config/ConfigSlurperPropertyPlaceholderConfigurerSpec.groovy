@@ -29,51 +29,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-apply plugin: 'groovy'
-apply plugin: 'maven'
-apply plugin: 'release'
-apply plugin: 'cobertura'
-apply plugin: 'idea'
+package se.su.it.ldap.orm.config
 
-/**
- * Wrapper
- */
-task wrapper(type: Wrapper) {
-  gradleVersion = '1.7'
-}
+import spock.lang.Specification
 
-cobertura {
-  format = 'xml'
-  includes = ['**/*.groovy']
-}
+class ConfigSlurperPropertyPlaceholderConfigurerSpec extends Specification {
 
-dependencies {
-  compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.1.7'
-  compile group: 'org.apache.directory.api', name:'api-all', version:'1.0.0-M19'
-  compile group: 'org.springframework', name:'spring-beans', version:'3.2.4.RELEASE'
-  compile group: 'org.springframework', name:'spring-context', version:'3.2.4.RELEASE'
+  def "loadProperties should put all ConfigManager.config properties to prop"() {
+    setup:
+    Properties properties = Mock(Properties)
+    def configurer = new ConfigSlurperPropertyPlaceholderConfigurer()
+    def configManager = Mock(ConfigManager)
+    def config = Mock(ConfigObject)
+    def configProps = Mock(Properties)
 
-  testCompile group: 'org.spockframework', name: 'spock-core', version: '0.7-groovy-2.0'
-  testCompile group: 'org.objenesis', name: 'objenesis', version: '2.0'
-  testCompile group: 'cglib', name: 'cglib-nodep', version: '2.2'
-}
+    configurer.configManager = configManager
+    configManager.config >> config
 
-repositories {
-  maven {
-    url "http://maven.it.su.se/it.su.se/maven2"
-  }
-  mavenCentral()
-}
+    when:
+    configurer.loadProperties(properties)
 
-/**
- * Buildscript dependencies
- */
-buildscript {
-  dependencies {
-    classpath 'com.github.townsfolk:gradle-release:1.2'
-    classpath 'com.eriwen:gradle-cobertura-plugin:1.1.1'
-  }
-  repositories {
-    mavenCentral()
+    then:
+    1 * properties.putAll(configProps)
+    1 * config.toProperties() >> configProps
   }
 }
