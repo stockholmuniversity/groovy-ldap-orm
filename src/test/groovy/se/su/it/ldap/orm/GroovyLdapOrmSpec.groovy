@@ -63,6 +63,7 @@ class GroovyLdapOrmSpec extends Specification {
 
   def "init should apply mixin to configured schema classes"() {
     setup:
+    GroovyMock(ClassPathXmlApplicationContext, global: true)
     def customConfig = new ConfigObject()
     customConfig.schemas = [
             DummySchema
