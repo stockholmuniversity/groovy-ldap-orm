@@ -68,6 +68,7 @@ class GroovyLdapOrmSpec extends Specification {
             DummySchema
     ]
     GroovyMock(DummySchema, global: true)
+    DummySchema.metaClass >> new ExpandoMetaClass(DummySchema)
 
     when:
     new GroovyLdapOrm(customConfig).init()
