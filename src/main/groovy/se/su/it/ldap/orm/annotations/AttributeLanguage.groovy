@@ -6,6 +6,6 @@ import java.lang.annotation.*
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface AttributeLanguage {
-  String name() default null;
-  String lang() default 'en';
+  String name() default ''
+  String lang() default 'en'
 }
