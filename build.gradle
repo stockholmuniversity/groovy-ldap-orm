@@ -35,6 +35,19 @@ apply plugin: 'release'
 apply plugin: 'jacoco'
 apply plugin: 'idea'
 
+task sonarPom << {
+  def pom = pom {
+    project {
+      packaging 'jar'
+      properties {
+        'sonar.language' 'grvy'
+      }
+    }
+  }.getEffectivePom()
+  pom.dependencies = []
+  pom.writeTo("$buildDir/pom.xml")
+}
+
 /**
  * Wrapper
  */
